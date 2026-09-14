@@ -5,6 +5,7 @@
   "scripts": {
     "dev:api": "pnpm --filter @retail-ops/api dev",
     "db:up": "docker compose up -d postgres",
-    "db:down": "docker compose down"
+    "db:down": "docker compose down",
+    "db:migrate": "pnpm --filter @retail-ops/api migrate"
   }
 }
