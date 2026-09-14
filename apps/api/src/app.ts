@@ -2,9 +2,12 @@ import express from "express";
 import cookieParser from "cookie-parser";
 import type { ErrorRequestHandler } from "express";
 import { pool } from "./db.js";
+import { DomainError, type DomainErrorCode } from "./lib/domain-error.js";
 import { HttpError } from "./lib/http-error.js";
 import { authRouter } from "./modules/auth/routes.js";
 import { tasksRouter } from "./modules/tasks/routes.js";
+
+const DOMAIN_STATUS: Record<DomainErrorCode, number> = { not_found: 404, forbidden: 403, invalid_transition: 409 };
 
 // แยก app ออกจาก server เพื่อให้ test import app ได้โดยไม่ต้องเปิด port จริง
 export function createApp() {
@@ -24,10 +27,15 @@ export function createApp() {
   });
 
   app.use("/auth", authRouter);
-  app.use("/tasks", tasksRouter);
+  app.use("/tasks", tasksRouter());
 
   // ตาข่ายสุดท้าย: HttpError ที่ตั้งใจโยน → status ของมัน; error อื่น = bug → 500 ไม่เปิดเผยรายละเอียด
   const onError: ErrorRequestHandler = (err, _req, res, _next) => {
+    if (err instanceof DomainError) {
+      // กฎธุรกิจไม่รู้จัก HTTP — แปลง code → status ที่นี่ที่เดียว
+      res.status(DOMAIN_STATUS[err.code]).json({ error: err.code, message: err.message });
+      return;
+    }
     if (err instanceof HttpError) {
       res.status(err.status).json({ error: err.code, message: err.message });
       return;
