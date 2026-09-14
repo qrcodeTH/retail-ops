@@ -4,6 +4,7 @@ import type { ErrorRequestHandler } from "express";
 import { pool } from "./db.js";
 import { HttpError } from "./lib/http-error.js";
 import { authRouter } from "./modules/auth/routes.js";
+import { tasksRouter } from "./modules/tasks/routes.js";
 
 // แยก app ออกจาก server เพื่อให้ test import app ได้โดยไม่ต้องเปิด port จริง
 export function createApp() {
@@ -23,6 +24,7 @@ export function createApp() {
   });
 
   app.use("/auth", authRouter);
+  app.use("/tasks", tasksRouter);
 
   // ตาข่ายสุดท้าย: HttpError ที่ตั้งใจโยน → status ของมัน; error อื่น = bug → 500 ไม่เปิดเผยรายละเอียด
   const onError: ErrorRequestHandler = (err, _req, res, _next) => {
