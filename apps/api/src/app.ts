@@ -1,11 +1,15 @@
 import express from "express";
+import cookieParser from "cookie-parser";
 import type { ErrorRequestHandler } from "express";
 import { pool } from "./db.js";
+import { HttpError } from "./lib/http-error.js";
+import { authRouter } from "./modules/auth/routes.js";
 
 // แยก app ออกจาก server เพื่อให้ test import app ได้โดยไม่ต้องเปิด port จริง
 export function createApp() {
   const app = express();
   app.use(express.json());
+  app.use(cookieParser());
 
   app.get("/health", async (_req, res) => {
     // ถาม DB จริง ไม่ใช่แค่ตอบ ok — ถ้า DB ล่ม health ต้องบอกว่าล่ม
@@ -18,8 +22,14 @@ export function createApp() {
     }
   });
 
-  // ตาข่ายสุดท้าย: error ที่หลุดจาก handler ใด ๆ ต้องกลายเป็น 500 ไม่ใช่ crash
+  app.use("/auth", authRouter);
+
+  // ตาข่ายสุดท้าย: HttpError ที่ตั้งใจโยน → status ของมัน; error อื่น = bug → 500 ไม่เปิดเผยรายละเอียด
   const onError: ErrorRequestHandler = (err, _req, res, _next) => {
+    if (err instanceof HttpError) {
+      res.status(err.status).json({ error: err.code, message: err.message });
+      return;
+    }
     console.error("unhandled request error:", err);
     res.status(500).json({ error: "internal_error" });
   };
