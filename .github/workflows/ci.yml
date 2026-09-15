@@ -1,0 +1,50 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  api:
+    runs-on: ubuntu-latest
+    # a throwaway Postgres for this job only — proves migrations apply on a clean database
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: retail
+          POSTGRES_PASSWORD: retail
+          POSTGRES_DB: retail_ops
+        ports: ["5432:5432"]
+        options: >-
+          --health-cmd "pg_isready -U retail -d retail_ops"
+          --health-interval 5s --health-timeout 3s --health-retries 10
+    env:
+      DATABASE_URL: postgres://retail:retail@localhost:5432/retail_ops
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - name: Typecheck
+        run: pnpm --filter @retail-ops/api typecheck
+      - name: Unit tests (no database needed)
+        run: pnpm --filter @retail-ops/api test
+      - name: Migrations apply on a clean database
+        run: pnpm --filter @retail-ops/api migrate
+      - name: Seed + smoke test the real HTTP flow
+        run: |
+          pnpm --filter @retail-ops/api seed
+          (pnpm --filter @retail-ops/api exec tsx src/server.ts &) ; sleep 4
+          curl -fsS localhost:3000/health
+          curl -fsS -c jar -X POST localhost:3000/auth/login -H 'content-type: application/json' \
+            -d '{"email":"manager.bkk@retail.test","password":"password123"}'
+          curl -fsS -b jar -X POST localhost:3000/tasks -H 'content-type: application/json' -d '{"title":"ci"}'
+          # cross-store read must be 404
+          test "$(curl -s -o /dev/null -w '%{http_code}' -b jar localhost:3000/tasks/999)" = "404"
+      - name: Docker image builds
+        run: docker build -f apps/api/Dockerfile -t retail-ops-api .
