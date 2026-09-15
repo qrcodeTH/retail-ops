@@ -1,4 +1,5 @@
 import { Router } from "express";
+import rateLimit from "express-rate-limit";
 import { z } from "zod";
 import { pool } from "../../db.js";
 import { HttpError } from "../../lib/http-error.js";
@@ -14,7 +15,11 @@ const credentials = z.object({
   password: z.string().min(8).max(200),
 });
 
-authRouter.post("/login", async (req, res) => {
+// Brute-force protection: 10 attempts per IP per 15 minutes.
+// Argon2 makes each attempt slow on purpose; the limiter stops that slowness from becoming a CPU drain.
+const loginLimiter = rateLimit({ windowMs: 15 * 60 * 1000, limit: 10, standardHeaders: true, legacyHeaders: false });
+
+authRouter.post("/login", loginLimiter, async (req, res) => {
   const { email, password } = parse(credentials, req.body);
 
   const result = await pool.query<{ id: number; password_hash: string }>(

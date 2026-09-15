@@ -15,6 +15,8 @@ API: https://retail-ops-api.onrender.com/health (free tier — first request aft
 
 Demo users (password `password123`): `manager.bkk@retail.test`, `staff.bkk@retail.test`, `manager.cnx@retail.test`, `staff.cnx@retail.test`
 
+Demo data only: nothing real is stored, the database is disposable and may be reset at any time, and login is rate-limited per IP.
+
 ## Run
 
 ```sh

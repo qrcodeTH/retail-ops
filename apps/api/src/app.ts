@@ -12,6 +12,8 @@ const DOMAIN_STATUS: Record<DomainErrorCode, number> = { not_found: 404, forbidd
 // app is separate from server so tests can import it without opening a real port
 export function createApp() {
   const app = express();
+  // Behind Render's load balancer the client IP arrives in X-Forwarded-For; trust exactly one proxy hop
+  app.set("trust proxy", 1);
   app.use(express.json());
   app.use(cookieParser());
 
