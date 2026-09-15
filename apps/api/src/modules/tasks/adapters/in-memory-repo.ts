@@ -6,8 +6,11 @@ export function inMemoryTaskRepository(seed: Task[] = []): TaskRepository & { ta
   const tasks = [...seed];
   return {
     tasks,
-    async listByStore(storeId) {
-      return tasks.filter((t) => t.storeId === storeId).sort((a, b) => b.id - a.id);
+    async listByStore(storeId, { limit, before }) {
+      return tasks
+        .filter((t) => t.storeId === storeId && (before === undefined || t.id < before))
+        .sort((a, b) => b.id - a.id)
+        .slice(0, limit);
     },
     async findInStore(id, storeId) {
       return tasks.find((t) => t.id === id && t.storeId === storeId) ?? null;

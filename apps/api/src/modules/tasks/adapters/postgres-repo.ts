@@ -14,8 +14,14 @@ const toTask = (r: Row): Task => ({
 
 export function postgresTaskRepository(pool: pg.Pool): TaskRepository {
   return {
-    async listByStore(storeId) {
-      const r = await pool.query<Row>("SELECT * FROM tasks WHERE store_id = $1 ORDER BY id DESC", [storeId]);
+    async listByStore(storeId, { limit, before }) {
+      const r = await pool.query<Row>(
+        `SELECT * FROM tasks
+          WHERE store_id = $1 AND ($2::int IS NULL OR id < $2)
+          ORDER BY id DESC
+          LIMIT $3`,
+        [storeId, before ?? null, limit],
+      );
       return r.rows.map(toTask);
     },
     async findInStore(id, storeId) {

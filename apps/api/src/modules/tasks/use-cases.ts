@@ -2,7 +2,7 @@
 // The repository is passed in (not imported) → Postgres is plugged in at runtime, an array is plugged in for tests.
 import { DomainError } from "../../lib/domain-error.js";
 import { assertCanCreate, claim, complete, type Actor, type Task } from "./domain.js";
-import type { TaskRepository } from "./ports.js";
+import type { Page, TaskRepository } from "./ports.js";
 
 type Deps = { repo: TaskRepository; now?: () => Date };
 
@@ -15,7 +15,12 @@ export function makeTaskUseCases({ repo, now = () => new Date() }: Deps) {
   }
 
   return {
-    listTasks: (actor: Actor) => repo.listByStore(actor.storeId),
+    // Returns one page plus the cursor for the next one (null when this was the last page)
+    async listTasks(actor: Actor, page: Page) {
+      const items = await repo.listByStore(actor.storeId, page);
+      const nextBefore = items.length === page.limit ? items[items.length - 1]!.id : null;
+      return { items, nextBefore };
+    },
 
     getTask: (id: number, actor: Actor) => requireOwnStoreTask(id, actor),
 

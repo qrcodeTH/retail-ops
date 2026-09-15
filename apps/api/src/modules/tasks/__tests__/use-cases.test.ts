@@ -23,7 +23,20 @@ function setup(seed: Task[]) {
 describe("rule: you only see your own store", () => {
   it("list returns only tasks in the actor's store", async () => {
     const { uc } = setup([task({ id: 1, storeId: BKK }), task({ id: 2, storeId: CNX })]);
-    expect((await uc.listTasks(staffBkk)).map((t) => t.id)).toEqual([1]);
+    const page = await uc.listTasks(staffBkk, { limit: 50 });
+    expect(page.items.map((t) => t.id)).toEqual([1]);
+    expect(page.nextBefore).toBeNull();
+  });
+  it("list is paginated by keyset: newest first, cursor points below the last item", async () => {
+    const { uc } = setup([1, 2, 3, 4, 5].map((id) => task({ id })));
+    const first = await uc.listTasks(staffBkk, { limit: 2 });
+    expect(first.items.map((t) => t.id)).toEqual([5, 4]);
+    expect(first.nextBefore).toBe(4);
+    const second = await uc.listTasks(staffBkk, { limit: 2, before: first.nextBefore! });
+    expect(second.items.map((t) => t.id)).toEqual([3, 2]);
+    const last = await uc.listTasks(staffBkk, { limit: 2, before: second.nextBefore! });
+    expect(last.items.map((t) => t.id)).toEqual([1]);
+    expect(last.nextBefore).toBeNull();
   });
   it("reading another store's task by id → not_found (not forbidden)", async () => {
     const { uc } = setup([task({ id: 2, storeId: CNX })]);
