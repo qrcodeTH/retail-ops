@@ -24,4 +24,5 @@ WORKDIR /repo/apps/api
 USER node
 EXPOSE 3000
 # migrate first, then serve. If migration fails the container exits and never serves a broken schema.
-CMD ["sh", "-c", "node dist/migrate.js && node dist/server.js"]
+# SEED_ON_BOOT=true also loads demo users (idempotent) — for environments without shell access.
+CMD ["sh", "-c", "node dist/migrate.js && { [ \"$SEED_ON_BOOT\" = true ] && node dist/seed.js || true; } && node dist/server.js"]
