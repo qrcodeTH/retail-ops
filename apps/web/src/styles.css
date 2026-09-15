@@ -1,0 +1,25 @@
+:root { font-family: system-ui, sans-serif; color: #1f2937; background: #f3f4f6; }
+body { margin: 0; padding: 2rem 1rem; }
+.card { max-width: 24rem; margin: 0 auto; background: #fff; padding: 1.5rem; border-radius: 12px; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+.card.wide { max-width: 44rem; }
+h1 { font-size: 1.25rem; margin: 0 0 1rem; }
+header { display: flex; align-items: baseline; gap: 1rem; margin-bottom: 1rem; }
+header h1 { flex: 1; margin: 0; }
+form { display: flex; flex-direction: column; gap: .75rem; }
+form.row { flex-direction: row; margin-bottom: 1rem; }
+form.row input { flex: 1; }
+label { display: flex; flex-direction: column; gap: .25rem; font-size: .875rem; }
+input { padding: .5rem .625rem; border: 1px solid #d1d5db; border-radius: 8px; font: inherit; }
+button { padding: .5rem .875rem; border: 0; border-radius: 8px; background: #2563eb; color: #fff; font: inherit; cursor: pointer; }
+button:disabled { opacity: .6; cursor: default; }
+button.link { background: none; color: #2563eb; padding: .25rem; }
+.tasks { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: .5rem; }
+.tasks li { display: flex; align-items: center; gap: .75rem; padding: .625rem .75rem; border: 1px solid #e5e7eb; border-radius: 8px; }
+.tasks li.done { opacity: .6; }
+.id { color: #9ca3af; font-variant-numeric: tabular-nums; }
+.title { flex: 1; }
+.badge { font-size: .75rem; padding: .125rem .5rem; border-radius: 999px; background: #e5e7eb; }
+.badge.in_progress { background: #fef3c7; }
+.badge.done { background: #d1fae5; }
+.error { color: #b91c1c; font-size: .875rem; margin: .5rem 0; }
+.muted { color: #6b7280; font-size: .875rem; }

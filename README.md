@@ -4,14 +4,14 @@ Retail branch operations system — a learning project built one product at a ti
 
 | Product | Status | What it exercises |
 |---|---|---|
-| P1 branch-tasks — task assignment per store | 🟡 API live, UI pending | auth, authorization, modular monolith, hexagonal, CI, Docker, deploy |
+| P1 branch-tasks — task assignment per store | ✅ live | auth, authorization, modular monolith, hexagonal, CI, Docker, deploy |
 | P2 event dashboard | planned | outbox, Redis Streams, consumer, read model |
 | P3 AI shelf check | planned | Node/Python boundary, async inference, human fallback |
 | P4 mobile offline | planned | React Native, SQLite, sync |
 
 ## Live
 
-API: https://retail-ops-api.onrender.com/health (free tier — first request after idle takes ~15 s)
+App: https://retail-ops-api.onrender.com (free tier — first request after idle takes ~15 s). API health: `/health`
 
 Demo users (password `password123`): `manager.bkk@retail.test`, `staff.bkk@retail.test`, `manager.cnx@retail.test`, `staff.cnx@retail.test`
 
@@ -26,6 +26,7 @@ pnpm db:up          # PostgreSQL 16 in Docker
 pnpm db:migrate
 pnpm db:seed
 pnpm dev:api        # http://localhost:3000/health
+pnpm dev:web        # http://localhost:5173 (proxies /auth,/tasks to the API)
 pnpm --filter @retail-ops/api test   # 12 unit tests, no DB needed
 ```
 
@@ -35,7 +36,7 @@ CI on every push: typecheck → unit tests → migrations on a clean Postgres �
 
 ```
 apps/api        Node + TypeScript + Express
-apps/web        (P1 step 6) React + Vite
+apps/web        React + Vite SPA, served by the API in production
 services/       (P3) Python AI service
 docs/decisions  decision cards — why each choice was made, and what would change it
 ```

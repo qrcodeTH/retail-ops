@@ -30,8 +30,8 @@ jobs:
           node-version: 22
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - name: Typecheck
-        run: pnpm --filter @retail-ops/api typecheck
+      - name: Typecheck (api + web)
+        run: pnpm --filter @retail-ops/api typecheck && pnpm --filter @retail-ops/web typecheck
       - name: Unit tests (no database needed)
         run: pnpm --filter @retail-ops/api test
       - name: Migrations apply on a clean database

@@ -7,6 +7,7 @@
     "db:up": "docker compose up -d postgres",
     "db:down": "docker compose down",
     "db:migrate": "pnpm --filter @retail-ops/api migrate",
-    "db:seed": "pnpm --filter @retail-ops/api seed"
+    "db:seed": "pnpm --filter @retail-ops/api seed",
+    "dev:web": "pnpm --filter @retail-ops/web dev"
   }
 }

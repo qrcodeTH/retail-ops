@@ -1,4 +1,6 @@
 import express from "express";
+import { existsSync } from "node:fs";
+import path from "node:path";
 import cookieParser from "cookie-parser";
 import type { ErrorRequestHandler } from "express";
 import { pool } from "./db.js";
@@ -30,6 +32,18 @@ export function createApp() {
 
   app.use("/auth", authRouter);
   app.use("/tasks", tasksRouter());
+
+  // Serve the built SPA from the same origin as the API (decision 0007): no CORS, cookies just work, one deployable.
+  // In dev the folder does not exist — Vite serves the page and proxies API calls instead.
+  const webDist = path.resolve(import.meta.dirname, "../../web/dist");
+  if (existsSync(webDist)) {
+    app.use(express.static(webDist));
+    // Any other GET that wants HTML gets index.html so client-side routes work on refresh
+    app.get("/{*splat}", (req, res, next) => {
+      if (!req.accepts("html")) return next();
+      res.sendFile(path.join(webDist, "index.html"));
+    });
+  }
 
   // Last line of defence: an intentional HttpError → its status; anything else is a bug → 500 with no details leaked
   const onError: ErrorRequestHandler = (err, _req, res, _next) => {
