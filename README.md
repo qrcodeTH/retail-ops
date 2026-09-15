@@ -1,10 +1,10 @@
 # retail-ops
 
-ระบบงานสาขาค้าปลีก — learning project สร้างทีละ product บน codebase เดียว
+Retail branch operations system — a learning project built one product at a time on a single codebase.
 
-| Product | สถานะ | สิ่งที่ฝึก |
+| Product | Status | What it exercises |
 |---|---|---|
-| P1 branch-tasks — มอบหมายงานสาขา | 🟡 API live, UI pending | auth, authorization, modular monolith, hexagonal, CI, Docker, deploy |
+| P1 branch-tasks — task assignment per store | 🟡 API live, UI pending | auth, authorization, modular monolith, hexagonal, CI, Docker, deploy |
 | P2 event dashboard | planned | outbox, Redis Streams, consumer, read model |
 | P3 AI shelf check | planned | Node/Python boundary, async inference, human fallback |
 | P4 mobile offline | planned | React Native, SQLite, sync |
@@ -35,7 +35,7 @@ CI on every push: typecheck → unit tests → migrations on a clean Postgres �
 apps/api        Node + TypeScript + Express
 apps/web        (P1 step 6) React + Vite
 services/       (P3) Python AI service
-docs/decisions  decision cards — ทำไมเลือกแบบนี้ และอะไรจะทำให้เปลี่ยนใจ
+docs/decisions  decision cards — why each choice was made, and what would change it
 ```
 
 Decision cards: [docs/decisions](docs/decisions)

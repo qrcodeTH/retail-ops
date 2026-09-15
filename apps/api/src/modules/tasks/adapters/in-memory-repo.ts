@@ -1,4 +1,4 @@
-// Adapter สำหรับ test: ที่เก็บงานเป็น array ในหน่วยความจำ ทำสัญญาเดียวกับ Postgres ทุกข้อ
+// Test adapter: tasks stored in an in-memory array, honouring exactly the same contract as Postgres
 import type { Task } from "../domain.js";
 import type { NewTask, TaskRepository } from "../ports.js";
 

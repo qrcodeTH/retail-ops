@@ -1,5 +1,5 @@
-// อ่านค่าตั้งค่าจาก environment ครั้งเดียวตอน process เริ่ม
-// ถ้าไม่มีค่าที่จำเป็นให้ล้มทันที ดีกว่าไปพังตอนมี request แรกเข้า
+// Read configuration from the environment once, at process start.
+// Fail immediately if a required value is missing — better than failing on the first request.
 function required(name: string): string {
   const value = process.env[name];
   if (!value) throw new Error(`Missing required env var: ${name}`);

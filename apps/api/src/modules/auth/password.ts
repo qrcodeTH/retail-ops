@@ -1,7 +1,7 @@
 import argon2 from "argon2";
 
-// argon2id: ช้าโดยตั้งใจ + salt สุ่มฝังใน hash string
-// เราไม่เขียนอัลกอริทึมเอง ใช้ไลบรารีมาตรฐานเท่านั้น
+// argon2id: deliberately slow, with a random salt embedded in the hash string.
+// We never implement the algorithm ourselves — standard library only.
 export function hashPassword(plain: string): Promise<string> {
   return argon2.hash(plain, { type: argon2.argon2id });
 }

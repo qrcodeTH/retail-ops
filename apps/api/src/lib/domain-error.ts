@@ -1,5 +1,5 @@
-// error ที่กฎธุรกิจโยน — ไม่รู้จัก HTTP status (นั่นเป็นเรื่องของ adapter ฝั่ง HTTP)
-// app.ts เป็นคนแปลง code → status ที่เดียว
+// Errors thrown by business rules. They know nothing about HTTP status codes —
+// that mapping belongs to the HTTP adapter and lives in app.ts, in one place.
 export type DomainErrorCode = "not_found" | "forbidden" | "invalid_transition";
 
 export class DomainError extends Error {

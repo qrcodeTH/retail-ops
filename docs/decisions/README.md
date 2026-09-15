@@ -1,15 +1,15 @@
 # Decision cards
 
-หนึ่งไฟล์ต่อหนึ่งการตัดสินใจ ใช้ template นี้:
+One file per decision, using this template:
 
 ```
-# NNNN — ชื่อการตัดสินใจ
+# NNNN — Decision title
 
-**Requirement / ปัญหา:** อะไรบังคับให้ต้องเลือก
-**ทางเลือก:** A / B / C สั้น ๆ
-**เลือก:** ...
-**เพราะ:** เหตุผลที่ผูกกับ requirement ไม่ใช่ความชอบ
-**ข้อเสียที่ยอมรับ:** ...
-**หลักฐาน:** ทดสอบ/วัดอะไรมาแล้ว
-**จะเปลี่ยนใจเมื่อ:** เงื่อนไขที่ทำให้ทางเลือกอื่นดีกว่า
+**Requirement / problem:** what forced a choice
+**Options:** A / B / C, briefly
+**Chosen:** ...
+**Because:** reasons tied to the requirement, not to preference
+**Accepted downsides:** ...
+**Evidence:** what was tested or measured
+**Revisit when:** the condition under which another option becomes better
 ```

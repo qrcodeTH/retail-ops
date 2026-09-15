@@ -23,15 +23,15 @@ authRouter.post("/login", async (req, res) => {
   );
   const user = result.rows[0];
 
-  // ตอบเหมือนกันทั้ง "ไม่มี email นี้" และ "รหัสผิด" — ไม่ให้คนนอกรู้ว่า email ไหนมีในระบบ
+  // Same response for "no such email" and "wrong password" — do not reveal which emails exist
   const ok = user ? await verifyPassword(user.password_hash, password) : false;
   if (!ok) throw new HttpError(401, "invalid_credentials");
 
   const sessionId = await createSession(user!.id);
   res.cookie(SESSION_COOKIE, sessionId, {
-    httpOnly: true,                                   // JS ในหน้าเว็บอ่านไม่ได้ → ขโมยผ่าน XSS ยากขึ้น
-    sameSite: "lax",                                  // เว็บอื่นยิง request มาพร้อม cookie เราไม่ได้ → กัน CSRF พื้นฐาน
-    secure: process.env.NODE_ENV === "production",    // ส่งเฉพาะ HTTPS ตอน production
+    httpOnly: true,                                   // page JavaScript cannot read it → harder to steal via XSS
+    sameSite: "lax",                                  // other sites cannot send requests carrying our cookie → basic CSRF protection
+    secure: process.env.NODE_ENV === "production",    // HTTPS only in production
     maxAge: 7 * 24 * 60 * 60 * 1000,
   });
   res.status(204).end();
@@ -47,8 +47,8 @@ authRouter.get("/me", requireAuth, (req, res) => {
   res.json(req.user);
 });
 
-// สร้างผู้ใช้ใหม่: ทำได้เฉพาะ manager และสร้างได้เฉพาะในสาขาตัวเอง
-// นี่คือ authorization ข้อแรกของระบบ — ไม่ใช่ endpoint สมัครสมาชิกสาธารณะ
+// Create a user: managers only, and only inside their own store.
+// This is the first authorization rule in the system — it is not a public sign-up endpoint.
 const newUser = credentials.extend({ role: z.enum(["manager", "staff"]) });
 
 authRouter.post("/users", requireAuth, async (req, res) => {
@@ -59,11 +59,11 @@ authRouter.post("/users", requireAuth, async (req, res) => {
   try {
     const result = await pool.query<{ id: number }>(
       "INSERT INTO users (email, password_hash, role, store_id) VALUES ($1, $2, $3, $4) RETURNING id",
-      [email, passwordHash, role, req.user!.storeId], // store มาจาก session ไม่ใช่จาก body → ข้ามสาขาไม่ได้
+      [email, passwordHash, role, req.user!.storeId], // store comes from the session, never from the body → cannot cross stores
     );
     res.status(201).json({ id: result.rows[0].id, email, role, storeId: req.user!.storeId });
   } catch (err) {
-    if ((err as { code?: string }).code === "23505") throw new HttpError(409, "email_taken"); // unique violation จาก DB
+    if ((err as { code?: string }).code === "23505") throw new HttpError(409, "email_taken"); // unique violation raised by the DB
     throw err;
   }
 });

@@ -1,5 +1,5 @@
-// Use cases: หนึ่งฟังก์ชัน = หนึ่งสิ่งที่ผู้ใช้ทำได้
-// รับ repository เข้ามาทาง parameter (ไม่ import มาเอง) → เสียบ Postgres ตอนรันจริง เสียบ array ตอน test
+// Use cases: one function = one thing a user can do.
+// The repository is passed in (not imported) → Postgres is plugged in at runtime, an array is plugged in for tests.
 import { DomainError } from "../../lib/domain-error.js";
 import { assertCanCreate, claim, complete, type Actor, type Task } from "./domain.js";
 import type { TaskRepository } from "./ports.js";
@@ -7,7 +7,7 @@ import type { TaskRepository } from "./ports.js";
 type Deps = { repo: TaskRepository; now?: () => Date };
 
 export function makeTaskUseCases({ repo, now = () => new Date() }: Deps) {
-  // กฎ: เห็นเฉพาะสาขาตัวเอง — storeId มาจาก actor (session) เสมอ
+  // Rule: you only see your own store — storeId always comes from the actor (the session)
   async function requireOwnStoreTask(id: number, actor: Actor): Promise<Task> {
     const task = await repo.findInStore(id, actor.storeId);
     if (!task) throw new DomainError("not_found", "task not found");

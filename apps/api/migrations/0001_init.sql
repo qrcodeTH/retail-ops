@@ -1,22 +1,22 @@
--- สาขา: ขอบเขตของสิทธิ์ทั้งหมดผูกกับตารางนี้
+-- Stores: every permission boundary in the system is scoped to a row in this table
 CREATE TABLE stores (
   id         serial PRIMARY KEY,
-  code       text NOT NULL UNIQUE,          -- เช่น "BKK-001" ใช้ในการอ้างอิงจากมนุษย์
+  code       text NOT NULL UNIQUE,          -- e.g. "BKK-001", the human-facing identifier
   name       text NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now()
 );
 
--- ผู้ใช้: ทุกคนสังกัดหนึ่งสาขา และมีหนึ่ง role
+-- Users: each belongs to exactly one store and has exactly one role
 CREATE TABLE users (
   id            serial PRIMARY KEY,
-  email         text NOT NULL UNIQUE,       -- login ด้วย email ซ้ำไม่ได้ (DB บังคับ ไม่ใช่แค่โค้ดเช็ค)
-  password_hash text NOT NULL,              -- ไม่มีคอลัมน์ password ตัวจริง มีแต่ hash
+  email         text NOT NULL UNIQUE,       -- login identifier; uniqueness enforced by the DB, not just app code
+  password_hash text NOT NULL,              -- there is no plaintext password column, only the hash
   role          text NOT NULL CHECK (role IN ('manager', 'staff')),
   store_id      int  NOT NULL REFERENCES stores(id),
   created_at    timestamptz NOT NULL DEFAULT now()
 );
 
--- งาน: ทุกแถวมี store_id → นี่คือสิ่งที่ทำให้ "เห็นเฉพาะสาขาตัวเอง" เช็คได้
+-- Tasks: every row carries store_id — this is what makes "see only your own store" checkable
 CREATE TABLE tasks (
   id          serial PRIMARY KEY,
   store_id    int  NOT NULL REFERENCES stores(id),
@@ -24,11 +24,11 @@ CREATE TABLE tasks (
   description text,
   status      text NOT NULL DEFAULT 'open'
               CHECK (status IN ('open', 'in_progress', 'done')),
-  created_by  int  NOT NULL REFERENCES users(id),   -- ใครสร้าง (ต้องเป็น manager — เช็คในโค้ด)
-  assignee_id int  REFERENCES users(id),            -- ใครรับงาน (ว่างได้ตอน open)
+  created_by  int  NOT NULL REFERENCES users(id),   -- who created it (must be a manager — enforced in code)
+  assignee_id int  REFERENCES users(id),            -- who claimed it (null while open)
   created_at  timestamptz NOT NULL DEFAULT now(),
   updated_at  timestamptz NOT NULL DEFAULT now()
 );
 
--- query หลักคือ "งานทั้งหมดของสาขานี้" → index ตาม store_id
+-- The main query is "all tasks for this store" → index on store_id
 CREATE INDEX tasks_store_id_idx ON tasks (store_id);

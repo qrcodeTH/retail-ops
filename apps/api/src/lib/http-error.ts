@@ -1,5 +1,5 @@
-// error ที่ตั้งใจส่งกลับ client พร้อม status code
-// แยกจาก Error ธรรมดา (bug) ซึ่งต้องกลายเป็น 500 และไม่เปิดเผยรายละเอียด
+// An error we intentionally return to the client with a specific status code.
+// Distinct from a plain Error (a bug), which must become a 500 without leaking details.
 export class HttpError extends Error {
   constructor(
     public readonly status: number,

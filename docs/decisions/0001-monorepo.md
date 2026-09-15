@@ -1,9 +1,9 @@
-# 0001 — Monorepo สำหรับทุก product
+# 0001 — One monorepo for every product
 
-**Requirement / ปัญหา:** P1–P4 ต่อยอดระบบเดียวกัน (ใช้ auth, DB, API ร่วมกัน) และคนทำมีคนเดียว
-**ทางเลือก:** A) monorepo `apps/*` + pnpm workspace  B) repo แยกต่อ service  C) Next.js full-stack ก้อนเดียว
-**เลือก:** A
-**เพราะ:** เปลี่ยน API contract แล้วแก้ทั้ง api/web/mobile ใน commit เดียว; setup CI/Docker ครั้งเดียว; ไม่มีเหตุผลเรื่องทีม/release แยกที่ทำให้ต้องแยก repo; C ผูก API กับ Next ทำให้ mobile (P4) ใช้ API ร่วมยากขึ้น
-**ข้อเสียที่ยอมรับ:** ถ้าอนาคตแยกทีมดูแล จะต้องแยก release pipeline ภายใน repo เอง
-**หลักฐาน:** ยังไม่มี — เป็นการเลือกจาก constraint ทีม ไม่ใช่จากการวัด
-**จะเปลี่ยนใจเมื่อ:** มีหลายทีมที่ต้องการ release cadence ต่างกัน หรือ product ใหม่ไม่แชร์ domain เดิมเลย (เช่นจองตั๋ว → repo ใหม่)
+**Requirement / problem:** P1–P4 extend the same system (shared auth, DB, API) and there is a single developer.
+**Options:** A) monorepo `apps/*` with a pnpm workspace  B) one repo per service  C) a single Next.js full-stack app
+**Chosen:** A
+**Because:** an API contract change is fixed across api/web/mobile in one commit; CI/Docker are set up once; there is no team or release-cadence reason to split repos; C couples the API to Next, which makes sharing it with the mobile app (P4) harder.
+**Accepted downsides:** if separate teams ever own separate parts, release pipelines will have to be split inside the repo.
+**Evidence:** none yet — chosen from team constraints, not from measurement.
+**Revisit when:** multiple teams need different release cadences, or a new product shares no domain with this one (e.g. ticket booking → new repo).

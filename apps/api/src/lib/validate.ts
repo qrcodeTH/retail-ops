@@ -1,8 +1,8 @@
 import type { ZodType } from "zod";
 import { HttpError } from "./http-error.js";
 
-// จุดที่ข้อมูลข้าม trust boundary: JSON จากใครก็ไม่รู้ → object ที่เรารับรองรูปร่างแล้ว
-// TypeScript ช่วยไม่ได้ตรงนี้ (มันหายไปแล้วตอน runtime) zod ถึงมีหน้าที่
+// The point where data crosses the trust boundary: JSON from an unknown sender → an object whose shape we have verified.
+// TypeScript cannot help here (its types are gone at runtime); that is why zod exists.
 export function parse<T>(schema: ZodType<T>, data: unknown): T {
   const result = schema.safeParse(data);
   if (!result.success) {

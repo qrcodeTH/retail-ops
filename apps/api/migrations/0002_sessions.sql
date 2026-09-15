@@ -1,8 +1,8 @@
--- session: "ตั๋ว" ที่ server ออกให้หลัง login
--- id เป็น random string ยาว ไม่ใช่ serial เพราะห้ามเดาได้
+-- Sessions: the "ticket" the server issues after login
+-- id is a long random string, not a serial — it must be unguessable
 CREATE TABLE sessions (
   id         text PRIMARY KEY,
-  user_id    int NOT NULL REFERENCES users(id) ON DELETE CASCADE,  -- ลบ user = session หายทันที
+  user_id    int NOT NULL REFERENCES users(id) ON DELETE CASCADE,  -- deleting a user kills their sessions
   expires_at timestamptz NOT NULL,
   created_at timestamptz NOT NULL DEFAULT now()
 );

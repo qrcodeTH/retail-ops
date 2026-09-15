@@ -9,19 +9,19 @@ import { tasksRouter } from "./modules/tasks/routes.js";
 
 const DOMAIN_STATUS: Record<DomainErrorCode, number> = { not_found: 404, forbidden: 403, invalid_transition: 409 };
 
-// แยก app ออกจาก server เพื่อให้ test import app ได้โดยไม่ต้องเปิด port จริง
+// app is separate from server so tests can import it without opening a real port
 export function createApp() {
   const app = express();
   app.use(express.json());
   app.use(cookieParser());
 
   app.get("/health", async (_req, res) => {
-    // ถาม DB จริง ไม่ใช่แค่ตอบ ok — ถ้า DB ล่ม health ต้องบอกว่าล่ม
+    // Query the DB for real, don't just answer ok — if the DB is down, health must say so
     try {
       const result = await pool.query<{ now: string }>("SELECT now()");
       res.json({ status: "ok", dbTime: result.rows[0].now });
     } catch (err) {
-      // 503 = service unavailable: ตัว API ยังอยู่ แต่ dependency ที่ต้องใช้ล่ม
+      // 503 = service unavailable: the API itself is alive, but a dependency it needs is down
       res.status(503).json({ status: "degraded", db: (err as Error).message });
     }
   });
@@ -29,10 +29,10 @@ export function createApp() {
   app.use("/auth", authRouter);
   app.use("/tasks", tasksRouter());
 
-  // ตาข่ายสุดท้าย: HttpError ที่ตั้งใจโยน → status ของมัน; error อื่น = bug → 500 ไม่เปิดเผยรายละเอียด
+  // Last line of defence: an intentional HttpError → its status; anything else is a bug → 500 with no details leaked
   const onError: ErrorRequestHandler = (err, _req, res, _next) => {
     if (err instanceof DomainError) {
-      // กฎธุรกิจไม่รู้จัก HTTP — แปลง code → status ที่นี่ที่เดียว
+      // Business rules know nothing about HTTP — code → status is mapped here, in one place
       res.status(DOMAIN_STATUS[err.code]).json({ error: err.code, message: err.message });
       return;
     }

@@ -1,5 +1,5 @@
-// ตรงกลางของ hexagon: กฎธุรกิจของ "งาน" ล้วน ๆ
-// ไฟล์นี้ห้าม import pg, express หรืออะไรที่แตะโลกภายนอก — ทดสอบได้ด้วย JS เปล่า ๆ
+// The centre of the hexagon: the pure business rules for "tasks".
+// This file must never import pg, express, or anything that touches the outside world — it is testable with plain JS.
 import { DomainError } from "../../lib/domain-error.js";
 
 export type TaskStatus = "open" | "in_progress" | "done";
@@ -16,10 +16,10 @@ export type Task = {
   updatedAt: Date;
 };
 
-// "ผู้ใช้" ในสายตาของกฎ: รู้แค่ที่จำเป็นต่อการตัดสิน ไม่ผูกกับ session/cookie
+// The "user" as the rules see it: only what is needed to decide, not tied to sessions or cookies
 export type Actor = { id: number; role: "manager" | "staff"; storeId: number };
 
-// กฎ: สถานะเดินได้ทางเดียว open → in_progress → done
+// Rule: status moves one way only, open → in_progress → done
 const TRANSITIONS: Record<TaskStatus, TaskStatus[]> = {
   open: ["in_progress"],
   in_progress: ["done"],
@@ -32,19 +32,19 @@ function assertTransition(task: Task, next: TaskStatus) {
   }
 }
 
-// กฎ: สร้างได้เฉพาะ manager
+// Rule: only managers create tasks
 export function assertCanCreate(actor: Actor) {
   if (actor.role !== "manager") throw new DomainError("forbidden", "only managers can create tasks");
 }
 
-// กฎ: รับงาน = open → in_progress และผู้รับคือคนที่เรียก
-// คืน task ใหม่ ไม่แก้ของเดิม (pure function: input เดิม → output เดิมเสมอ, test ง่าย)
+// Rule: claiming = open → in_progress, and the assignee is whoever claims.
+// Returns a new task instead of mutating (pure function: same input → same output, easy to test).
 export function claim(task: Task, actor: Actor, now: Date): Task {
   assertTransition(task, "in_progress");
   return { ...task, status: "in_progress", assigneeId: actor.id, updatedAt: now };
 }
 
-// กฎ: ปิดงาน = in_progress → done โดยคนรับงานหรือ manager
+// Rule: completing = in_progress → done, by the assignee or a manager
 export function complete(task: Task, actor: Actor, now: Date): Task {
   assertTransition(task, "done");
   if (task.assigneeId !== actor.id && actor.role !== "manager") {

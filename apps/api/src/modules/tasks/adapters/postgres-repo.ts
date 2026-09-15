@@ -1,4 +1,4 @@
-// Adapter ฝั่ง DB: ที่เดียวในโมดูล tasks ที่มี SQL
+// DB adapter: the only place in the tasks module that contains SQL
 import type pg from "pg";
 import type { Task, TaskStatus } from "../domain.js";
 import type { NewTask, TaskRepository } from "../ports.js";

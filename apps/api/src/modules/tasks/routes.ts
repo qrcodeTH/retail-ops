@@ -1,5 +1,5 @@
-// Adapter ฝั่ง HTTP: แปลง request → เรียก use case → แปลงผลเป็น response
-// ไม่มีกฎธุรกิจในไฟล์นี้ และไม่มี SQL
+// HTTP adapter: request → use case → response.
+// No business rules in this file, and no SQL.
 import { Router } from "express";
 import { z } from "zod";
 import { pool } from "../../db.js";
@@ -14,10 +14,10 @@ const createBody = z.object({
 });
 const idParam = z.object({ id: z.coerce.number().int().positive() });
 
-// รับ use cases เข้ามา เพื่อให้ test ระดับ HTTP เสียบ in-memory repo ได้เช่นกัน
+// Use cases are injected so HTTP-level tests can plug in the in-memory repo too
 export function tasksRouter(tasks: TaskUseCases = makeTaskUseCases({ repo: postgresTaskRepository(pool) })) {
   const router = Router();
-  router.use(requireAuth); // ทุก route ในนี้ต้อง login ก่อน
+  router.use(requireAuth); // every route here requires a logged-in user
 
   router.get("/", async (req, res) => {
     res.json(await tasks.listTasks(req.user!));

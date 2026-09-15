@@ -1,12 +1,12 @@
-// Port: สัญญาที่กฎธุรกิจต้องการจากโลกภายนอก — "ฉันต้องการที่เก็บงานที่ทำ 3 อย่างนี้ได้"
-// ใครจะมาเป็นที่เก็บ (Postgres, array, SQLite) ไม่ใช่เรื่องของกฎ
+// Port: the contract the business rules require from the outside world —
+// "I need a task store that can do these four things." Who provides it (Postgres, an array, SQLite) is not the rules' concern.
 import type { Task } from "./domain.js";
 
 export type NewTask = Pick<Task, "storeId" | "title" | "description" | "createdBy">;
 
 export interface TaskRepository {
   listByStore(storeId: number): Promise<Task[]>;
-  // หาใน "สาขานี้" เท่านั้น — scope เป็นส่วนหนึ่งของสัญญา ไม่ใช่สิ่งที่ลืมได้
+  // Look up within "this store" only — the scope is part of the contract, not something a caller can forget
   findInStore(id: number, storeId: number): Promise<Task | null>;
   insert(task: NewTask): Promise<Task>;
   save(task: Task): Promise<Task>;
